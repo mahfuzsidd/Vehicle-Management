@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Management System - Log Trip Entry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. CORE LIGHT THEME BACKGROUND --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .form-title { font-family: 'Poppins', sans-serif; }
+        .btn-submit { font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 30%, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. LIGHT ELEVATED HEADER --- */
+        header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(14, 165, 233, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        header .logo {
+            font-size: 26px; font-weight: 800; 
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            cursor: pointer; letter-spacing: 0.5px;
+        }
+        nav { display: flex; gap: 20px; }
+        nav a {
+            color: #64748b; text-decoration: none; font-size: 14px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 12px 24px; border-radius: 12px; transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        nav a:hover {
+            color: #0284c7; background: rgba(14, 165, 233, 0.08);
+            transform: translateY(-1px);
+        }
+        nav a.active {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); 
+            color: #ffffff; font-weight: 700;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3);
+        }
+
+        /* --- 3. MAIN CONTAINER & ELEVATED FORM CARD --- */
+        main { flex: 1; padding: 50px 20px; max-width: 600px; width: 100%; margin: 0 auto; }
+        
+        .form-container {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06); border-radius: 24px; padding: 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+        
+        .form-title {
+            font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .form-subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+
+        /* --- 4. LIGHT FORM INPUT ELEMENTS --- */
+        .form-group { margin-bottom: 22px; }
+        label { 
+            display: block; color: #475569; font-size: 12px; font-weight: 700; 
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; 
+        }
+        
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%; padding: 15px 18px; 
+            background: #f8fafc;
+            border: 1px solid #cbd5e1; border-radius: 14px;
+            color: #0f172a; font-size: 15px; font-weight: 500; outline: none;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus {
+            border-color: #0284c7; 
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+            background: #ffffff;
+        }
+
+        /* --- 5. 12-HOUR TIME GRID --- */
+        .time-picker-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+        /* --- 6. CLEAN EXECUTIVE SUBMIT BUTTON --- */
+        .btn-submit {
+            width: 100%; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff; border: none; padding: 18px; font-size: 16px; font-weight: 700;
+            border-radius: 14px; cursor: pointer; text-transform: uppercase; margin-top: 15px;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(2, 132, 199, 0.35);
+        }
+        .btn-submit:disabled {
+            background: #cbd5e1; color: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none;
+        }
+
+        /* --- 7. DYNAMIC POPUP MODAL NOTIFICATION --- */
+        .popup-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+            z-index: 1000; justify-content: center; align-items: center;
+        }
+        .popup-box {
+            background: #ffffff; padding: 35px; border-radius: 20px; text-align: center;
+            max-width: 400px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            animation: popupSlide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popupSlide {
+            from { transform: translateY(20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .popup-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; }
+        .popup-text { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 20px; }
+        .btn-close-popup {
+            background: #0284c7; color: white; border: none; padding: 12px 30px;
+            border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-close-popup:hover { background: #0369a1; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 20px; padding: 20px 15px; text-align: center; }
+            main { padding: 30px 15px; }
+        }
+        footer {
+            background: #ffffff; color: #64748b; text-align: center; padding: 25px;
+            font-size: 14px; margin-top: auto; border-top: 2px solid #e2e8f0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="window.location.href='home.html'">Vehicle Management</div>
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="trip-entry.html" class="active">Trip Entry</a>
+            <a href="download.html">Download</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <div class="form-title">📝 Log Trip Entry</div>
+            <p class="form-subtitle">Record active fleet deployments directly to Cloud Sheets</p>
+            
+            <form id="tripForm" onsubmit="handleFormSubmit(event)">
+                
+                <div class="form-group">
+                    <label for="user">Vehicle Number (user)</label>
+                    <select id="user" required>
+                        <option value="" disabled selected hidden>Select Vehicle Asset</option>
+                        <option value="0812">0812</option>
+                        <option value="0813">0813</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="driver">Driver Name</label>
+                    <select id="driver" required>
+                        <option value="" disabled selected hidden>Select Driver</option>
+                        <option value="Danish">Danish</option>
+                        <option value="Masud">Masud</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="company">Company Name</label>
+                    <select id="company" required>
+                        <option value="" disabled selected hidden>Select Company</option>
+                        <option value="JP">JP</option>
+                        <option value="BOA">BOA</option>
+                        <option value="T-MAHINDRA">T-MAHINDRA</option>
+                        <option value="4RD">4RD</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="km">Kilometers Run (km)</label>
+                    <input type="number" id="km" placeholder="Enter operational KM" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="tripDate">Trip Date</label>
+                    <input type="date" id="tripDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Trip Start Time (12hr Format)</label>
+                    <div class="time-picker-grid">
+                        <select id="timeHour" required>
+                            <option value="" disabled selected hidden>HH</option>
+                            <option value="01">01</option><option value="02">02</option>
+                            <option value="03">03</option><option value="04">04</option>
+                            <option value="05">05</option><option value="06">06</option>
+                            <option value="07">07</option><option value="08">08</option>
+                            <option value="09">09</option><option value="10">10</option>
+                            <option value="11">11</option><option value="12">12</option>
+                        </select>
+                        <select id="timeMinute" required>
+                            <option value="" disabled selected hidden>MM</option>
+                            <option value="00">00</option><option value="05">05</option>
+                            <option value="10">10</option><option value="15">15</option>
+                            <option value="20">20</option><option value="25">25</option>
+                            <option value="30">30</option><option value="35">35</option>
+                            <option value="40">40</option><option value="45">45</option>
+                            <option value="50">50</option><option value="55">55</option>
+                        </select>
+                        <select id="timeAmpm" required>
+                            <option value="" disabled selected hidden>AM/PM</option>
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="countInput">Count</label>
+                    <input type="text" id="countInput" placeholder="Enter count info">
+                </div>
+
+                <div class="form-group">
+                    <label for="singleCount4dInput">Single Count for 4D</label>
+                    <input type="text" id="singleCount4dInput" placeholder="Enter single count for 4d info">
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+            </form>
+        </div>
+    </main>
+
+    <div class="popup-overlay" id="successPopup">
+        <div class="popup-box">
+            <span class="popup-icon">✅</span>
+            <div class="popup-text">Your data saved successfully!</div>
+            <button class="btn-close-popup" onclick="closePopup()">OK</button>
+        </div>
+    </div>
+
+    <footer>&copy; 2026 Vehicle Management System. All Rights Reserved.</footer>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNsUjkZZDSAYsnoAkkjF_HxgZhSyct7qxXd7sHRjkBpk2WkezNMhwjK4C5phjQVgDh/exec";
+
+        // Auto-populate system date on mount
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tripDate').value = today;
+        };
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Saving Data...";
+
+            const vehicle = document.getElementById('user').value;
+            const driverName = document.getElementById('driver').value;
+            const companyName = document.getElementById('company').value;
+            const kmRun = document.getElementById('km').value;
+            const tDate = document.getElementById('tripDate').value;
+            
+            const hh = document.getElementById('timeHour').value;
+            const mm = document.getElementById('timeMinute').value;
+            const ampm = document.getElementById('timeAmpm').value;
+            
+            // Forced prefix prevents Google Spreadsheet from treating this as a raw mathematical decimal fractional index
+            const compositeTime = "'" + hh + ":" + mm + " " + ampm;
+            
+            // Extracting values from the text inputs
+            const countVal = document.getElementById('countInput').value;
+            const singleCount4dVal = document.getElementById('singleCount4dInput').value;
+
+            const payload = {
+                user: vehicle,
+                driver: driverName,
+                company: companyName,
+                km: kmRun,
+                date: tDate,
+                time: compositeTime,
+                count: countVal,
+                singleCount4d: singleCount4dVal
+            };
+
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // Open customized success popup
+                document.getElementById('successPopup').style.display = 'flex';
+                document.getElementById('tripForm').reset();
+                document.getElementById('tripDate').value = new Date().toISOString().split('T')[0];
+            })
+            .catch(error => {
+                console.error(error);
+                alert("❌ Connection failed. Check App Script configuration.");
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit";
+            });
+        }
+
+        function closePopup() {
+            document.getElementById('successPopup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
