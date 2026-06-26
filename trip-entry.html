@@ -294,12 +294,13 @@
             const countVal = document.getElementById('countInput').value;
             const singleCount4dVal = document.getElementById('singleCount4dInput').value;
 
+            // FIX: Added string forcing ('') to prevent Google Script from subtracting days via Timezone shifts
             const payload = {
                 user: vehicle,
                 driver: driverName,
                 company: companyName,
                 km: kmRun,
-                date: tDate,
+                date: "'" + tDate, 
                 time: compositeTime,
                 count: countVal,
                 singleCount4d: singleCount4dVal
@@ -333,3 +334,4 @@
     </script>
 </body>
 </html>
+
