@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Management System - Detailed Summary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .widget-title, .table-title, .radar-driver-name { font-family: 'Poppins', sans-serif; }
+        .widget-value, .progress-percentage, .radar-calc-val, .roster-subcard-value, .stat-pill-val { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
+        
+        body {
+            display: flex; flex-direction: column; min-height: 100vh;
+            background: radial-gradient(circle at 50% 30%, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+            color: #1e293b; overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid rgba(14, 165, 233, 0.15); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        header .logo {
+            font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; letter-spacing: 0.5px;
+        }
+        nav { display: flex; gap: 15px; }
+        nav a {
+            color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            padding: 12px 20px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid transparent;
+        }
+        nav a:hover { color: #0284c7; background: rgba(14, 165, 233, 0.08); transform: translateY(-1px); }
+        nav a.active { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; font-weight: 700; box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3); }
+
+        main { flex: 1; padding: 40px 20px; max-width: 1200px; width: 100%; margin: 0 auto; }
+        
+        .section-heading {
+            font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+            text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;
+        }
+
+        /* --- 1. COMPANY 4RD DRIVER MATRIX RADAR --- */
+        .radar-4rd-main-container {
+            background: #f0fdf4; border: 2px dashed #16a34a; border-radius: 24px;
+            padding: 25px; margin-bottom: 35px; box-shadow: 0 15px 35px rgba(22, 163, 74, 0.03);
+        }
+        .radar-4rd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 15px; }
+        .radar-driver-card { background: #ffffff; border: 1px solid #bbf7d0; border-radius: 18px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.01); }
+        .radar-driver-name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px; border-left: 4px solid #16a34a; padding-left: 10px; }
+        
+        /* --- LAYOUT WRAPPER GRIDS --- */
+        .summary-double-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 35px; }
+        .analytics-card { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.06); border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.03); }
+        
+        /* --- 2. VEHICLE UTILIZATION TILES --- */
+        .asset-deck { display: flex; flex-direction: column; gap: 15px; }
+        .asset-sub-tile { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; }
+        .asset-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .asset-name { font-size: 17px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .asset-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .asset-data-cell { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .asset-cell-lbl { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+        .asset-cell-val { font-size: 15px; font-weight: 700; color: #1e293b; }
+
+        /* --- 3. CORPORATE RADAR OVERLAYS --- */
+        .radar-bar-container { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+        .radar-row { display: flex; flex-direction: column; gap: 6px; }
+        .radar-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+        .radar-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .radar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .fill-jp { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+        .fill-boa { background: linear-gradient(90deg, #16a34a, #4ade80); }
+        .fill-tmah { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+        .fill-4rd { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+
+        .table-responsive { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 14px; background: #ffffff; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- 4. LEADERBOARD WORKFORCE --- */
+        .badge-rank { padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .rank-top { background: #fef3c7; color: #d97706; }
+        .rank-normal { background: #f1f5f9; color: #475569; }
+
+        /* --- 5. AVERAGES METRIC TILES --- */
+        .averages-deck-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .stat-pill-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.01); }
+        .stat-pill-lbl { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-pill-val { font-size: 18px; font-weight: 700; color: #0f172a; }
+
+        @media (max-width: 900px) { .summary-double-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 20px; padding: 20px 15px; text-align: center; }
+            nav { flex-wrap: wrap; justify-content: center; gap: 10px; }
+            main { padding: 25px 15px; }
+            .radar-4rd-grid, .asset-data-grid { grid-template-columns: 1fr; }
+        }
+        footer { background: #ffffff; color: #64748b; text-align: center; padding: 25px; font-size: 14px; margin-top: auto; border-top: 2px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">Vehicle Management</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="summary.html" class="active">Summary</a>
+            <a href="trip-entry.html">Trip Entry</a>
+            <a href="download.html">Download</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="radar-4rd-main-container">
+            <h3 class="section-heading" style="border-bottom:none; margin-bottom:5px; color:#16a34a;">🎯 Company 4RD Analytics Radar</h3>
+            <p style="font-size:12px; color:#64748b;">Mathematical formula evaluation logic: <b>(Count + Single Count for 4D) &times; 2.8</b></p>
+            <div class="radar-4rd-grid" id="driver4rdRadarContainer">
+                <div style="text-align:center; grid-column:1/-1; padding:20px; color:#94a3b8;">Assembling active 4RD dataset...</div>
+            </div>
+        </div>
+
+        <div class="summary-double-grid">
+            <div class="analytics-card">
+                <h3 class="section-heading" style="border-bottom:none; margin-bottom:5px;">🚗 Vehicle Asset Wise Summary</h3>
+                <p style="font-size:12px; color:#64748b; margin-bottom:20px;">Fleet deployment runtime stats mapping active utilization matrix.</p>
+                <div class="asset-deck" id="vehicleSummaryContainer">
+                    <div style="text-align:center; color:#94a3b8; padding:30px;">Syncing fleet assets...</div>
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h3 class="section-heading" style="border-bottom:none; margin-bottom:5px;">🏢 Company Wise Summary</h3>
+                <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Volume share allocations and accumulated operational runtime.</p>
+                <div class="radar-bar-container" id="radarContainer" style="margin-bottom: 25px;"></div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Trips Logged</th>
+                                <th>Distance Run</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companyTableBody">
+                            <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Syncing records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-card" style="margin-bottom:35px;">
+            <h3 class="section-heading" style="border-bottom:none; margin-bottom:5px;">🎖️ Driver Leaderboard & Efficiency Summary</h3>
+            <p style="font-size:12px; color:#64748b; margin-bottom:20px;">Roster breakdown ordered sequentially by total logged trip execution loops.</p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Driver Name</th>
+                            <th>Total Logged Trips</th>
+                            <th>Total Distance Run</th>
+                        </tr>
+                    </thead>
+                    <tbody id="driverLeaderboardBody">
+                        <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Compiling leaderboard sequence...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="analytics-card" style="border-bottom: 4px solid #7c3aed;">
+            <h3 class="section-heading" style="border-bottom:none; margin-bottom:5px; color:#7c3aed;">📊 System Operational Averages Summary</h3>
+            <p style="font-size:12px; color:#64748b; margin-bottom:20px;">Algorithmic global fleet telemetry threshold values.</p>
+            <div class="averages-deck-grid">
+                <div class="stat-pill-card" style="border-left:4px solid #0284c7;">
+                    <div>
+                        <div class="stat-pill-lbl">Average Distance / Trip</div>
+                        <div class="stat-pill-val" id="avgDistanceTrip">0.0 KM</div>
+                    </div>
+                    <span style="font-size:24px;">🛣️</span>
+                </div>
+                <div class="stat-pill-card" style="border-left:4px solid #7c3aed;">
+                    <div>
+                        <div class="stat-pill-lbl">Peak Performance Date</div>
+                        <div class="stat-pill-val" id="peakDeploymentDate" style="font-size:14px; font-weight:bold;">N/A</div>
+                    </div>
+                    <span style="font-size:24px;">🔥</span>
+                </div>
+                <div class="stat-pill-card" style="border-left:4px solid #16a34a;">
+                    <div>
+                        <div class="stat-pill-lbl">Active Workforce Pool</div>
+                        <div class="stat-pill-val" id="activeWorkforceCount">0 Drivers</div>
+                    </div>
+                    <span style="font-size:24px;">👥</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>&copy; 2026 Vehicle Management System. All Rights Reserved.</footer>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNsUjkZZDSAYsnoAkkjF_HxgZhSyct7qxXd7sHRjkBpk2WkezNMhwjK4C5phjQVgDh/exec";
+
+        function getSafeValue(item, possibleKeys) {
+            for (let key of possibleKeys) {
+                if (item[key] !== undefined && item[key] !== null) return item[key];
+                if (item[key.toLowerCase()] !== undefined && item[key.toLowerCase()] !== null) return item[key.toLowerCase()];
+                if (item[key.toUpperCase()] !== undefined && item[key.toUpperCase()] !== null) return item[key.toUpperCase()];
+            }
+            return '';
+        }
+
+        function loadSummaryCoreData() {
+            fetch(WEB_APP_URL)
+            .then(response => response.json())
+            .then(data => {
+                if(!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('driver4rdRadarContainer').innerHTML = `<div style="text-align:center; grid-column:1/-1; color:#94a3b8;">No data rows received. Check connection.</div>`;
+                    return;
+                }
+
+                let globalTripsCount = data.length;
+                let globalKmSum = 0;
+                let companyStats = {
+                    "JP": { trips: 0, km: 0, class: "fill-jp" }, "BOA": { trips: 0, km: 0, class: "fill-boa" },
+                    "T-MAHINDRA": { trips: 0, km: 0, class: "fill-tmah" }, "4RD": { trips: 0, km: 0, class: "fill-4rd" }
+                };
+                let driver4rdMatrix = {};
+                let vehicleStats = {};
+                let driverLeaderboard = {};
+                let dailyDensityMapping = {};
+
+                data.forEach(item => {
+                    let vehicleNo = String(getSafeValue(item, ['user', 'vehicle', 'vehicleno'])).trim();
+                    let kmValue = Number(getSafeValue(item, ['km', 'kilometers', 'kms']) || 0);
+                    let compName = String(getSafeValue(item, ['company', 'companyname'])).trim().toUpperCase();
+                    let rawDate = getSafeValue(item, ['date', 'tripdate']);
+                    let dRaw = getSafeValue(item, ['driver', 'drivername']);
+                    let driverName = dRaw ? String(dRaw).trim() : "Unknown Driver";
+
+                    let countVal = Number(getSafeValue(item, ['count', 'totalcount']) || 0);
+                    let count4dVal = Number(getSafeValue(item, ['singleCount4d', 'singlecount4d', 'singleCount4D']) || 0);
+
+                    if(!vehicleNo || vehicleNo === "undefined" || vehicleNo === "") return;
+                    globalKmSum += kmValue;
+
+                    // Standardize Company Name
+                    let standardCompany = compName.includes("BOA") ? "BOA" : compName.includes("MAHINDRA") ? "T-MAHINDRA" : compName.includes("4RD") ? "4RD" : "JP";
+                    if(companyStats[standardCompany]) { companyStats[standardCompany].trips++; companyStats[standardCompany].km += kmValue; }
+
+                    // Process 4RD Formula Loop
+                    if(standardCompany === "4RD") {
+                        if(!driver4rdMatrix[driverName]) { driver4rdMatrix[driverName] = { countSum: 0, singleCountSum: 0 }; }
+                        driver4rdMatrix[driverName].countSum += countVal;
+                        driver4rdMatrix[driverName].singleCountSum += count4dVal;
+                    }
+
+                    // Process Vehicle
+                    if(!vehicleStats[vehicleNo]) { vehicleStats[vehicleNo] = { km: 0, trips: 0 }; }
+                    vehicleStats[vehicleNo].km += kmValue;
+                    vehicleStats[vehicleNo].trips++;
+
+                    // Process Driver Metrics
+                    if(driverName !== "Unknown Driver") {
+                        if(!driverLeaderboard[driverName]) { driverLeaderboard[driverName] = { trips: 0, km: 0 }; }
+                        driverLeaderboard[driverName].trips++;
+                        driverLeaderboard[driverName].km += kmValue;
+                    }
+
+                    // Date density mapping
+                    if(rawDate) {
+                        let cleanDateStr = String(rawDate).split('T')[0];
+                        dailyDensityMapping[cleanDateStr] = (dailyDensityMapping[cleanDateStr] || 0) + 1;
+                    }
+                });
+
+                // 1. RENDER 4RD RADAR PANELS
+                const driver4rdContainer = document.getElementById('driver4rdRadarContainer');
+                driver4rdContainer.innerHTML = '';
+                let d4rdKeys = Object.keys(driver4rdMatrix);
+                if(d4rdKeys.length === 0) {
+                    driver4rdContainer.innerHTML = `<div style="text-align:center; grid-column:1/-1; color:#64748b; padding:10px;">No matching entries found for Company 4RD.</div>`;
+                } else {
+                    d4rdKeys.forEach(drv => {
+                        let obj = driver4rdMatrix[drv];
+                        let combinedSum = obj.countSum + obj.singleCountSum;
+                        let formulaResult = (combinedSum * 2.8).toFixed(1);
+                        driver4rdContainer.innerHTML += `
+                            <div class="radar-driver-card">
+                                <div class="radar-driver-name">👤 Driver: ${drv}</div>
+                                <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+                                    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:5px;"><span style="color:#64748b;">Count Value:</span><b>${obj.countSum}</b></div>
+                                    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:5px;"><span style="color:#64748b;">Single Count:</span><b>${obj.singleCountSum}</b></div>
+                                    <div style="display:flex; justify-content:space-between; padding-top:2px; font-weight:600;"><span style="color:#16a34a;">Formula Sum (×2.8):</span><span style="color:#0284c7;" class="radar-calc-val">${Number(formulaResult).toLocaleString()}</span></div>
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                // 2. RENDER VEHICLE ASSET DECK
+                const vehicleContainer = document.getElementById('vehicleSummaryContainer');
+                vehicleContainer.innerHTML = '';
+                Object.keys(vehicleStats).forEach(vKey => {
+                    let vObj = vehicleStats[vKey];
+                    vehicleContainer.innerHTML += `
+                        <div class="asset-sub-tile">
+                            <div class="asset-name">🚘 Asset Layout: ${vKey}</div>
+                            <div class="asset-data-grid" style="margin-top:12px;">
+                                <div class="asset-data-cell"><div class="asset-cell-lbl">Distance Bound Sum</div><div class="asset-cell-val" style="color:#0284c7;">${vObj.km.toLocaleString()} KM</div></div>
+                                <div class="asset-data-cell"><div class="asset-cell-lbl">Trips Logged</div><div class="asset-cell-val" style="color:#16a34a;">${vObj.trips} Entries</div></div>
+                            </div>
+                        </div>`;
+                });
+
+                // 3. RENDER COMPANY ALLOCATIONS
+                const radarContainer = document.getElementById('radarContainer'); radarContainer.innerHTML = '';
+                const companyTableBody = document.getElementById('companyTableBody'); companyTableBody.innerHTML = '';
+                Object.keys(companyStats).forEach(cKey => {
+                    let share = globalTripsCount > 0 ? ((companyStats[cKey].trips / globalTripsCount) * 100).toFixed(1) : 0;
+                    radarContainer.innerHTML += `
+                        <div class="radar-row">
+                            <div class="radar-info"><span>🏢 ${cKey}</span><span class="progress-percentage" style="color:#475569;">${share}% share</span></div>
+                            <div class="radar-track"><div class="radar-fill ${companyStats[cKey].class}" style="width: ${share}%"></div></div>
+                        </div>`;
+                    companyTableBody.innerHTML += `<tr><td><b>${cKey}</b></td><td>${companyStats[cKey].trips} Entries</td><td style="color:#0284c7; font-weight:600;">${companyStats[cKey].km.toLocaleString()} KM</td></tr>`;
+                });
+
+                // 4. RENDER LEADERBOARD
+                const leaderboardBody = document.getElementById('driverLeaderboardBody');
+                leaderboardBody.innerHTML = '';
+                let sortedDrivers = Object.keys(driverLeaderboard).sort((a,b) => driverLeaderboard[b].trips - driverLeaderboard[a].trips);
+                sortedDrivers.forEach((dKey, idx) => {
+                    let drvObj = driverLeaderboard[dKey];
+                    let badgeClass = idx < 3 ? 'badge-rank rank-top' : 'badge-rank rank-normal';
+                    let rankText = idx === 0 ? "🥇 Elite 1" : idx === 1 ? "🥈 Rank 2" : idx === 2 ? "🥉 Rank 3" : `Rank ${idx + 1}`;
+                    leaderboardBody.innerHTML += `<tr><td><span class="${badgeClass}">${rankText}</span></td><td><b>${dKey}</b></td><td>${drvObj.trips} Logs</td><td style="color:#0284c7; font-weight:600;">${drvObj.km.toLocaleString()} KM</td></tr>`;
+                });
+
+                // 5. GLOBAL INDICATORS TILES
+                let globalAvg = globalTripsCount > 0 ? (globalKmSum / globalTripsCount).toFixed(1) : "0.0";
+                document.getElementById('avgDistanceTrip').innerText = `${Number(globalAvg).toLocaleString()} KM`;
+                document.getElementById('activeWorkforceCount').innerText = `${Object.keys(driverLeaderboard).length} Registered Drivers`;
+
+                let peakDateStr = "N/A"; let maxDensity = 0;
+                Object.keys(dailyDensityMapping).forEach(dayKey => {
+                    if(dailyDensityMapping[dayKey] > maxDensity) { maxDensity = dailyDensityMapping[dayKey]; peakDateStr = dayKey; }
+                });
+                document.getElementById('peakDeploymentDate').innerText = maxDensity > 0 ? `${peakDateStr} (${maxDensity} Logs)` : "N/A";
+
+            })
+            .catch(err => {
+                console.error("Fetch Exception Handled:", err);
+                document.getElementById('driver4rdRadarContainer').innerHTML = `<div style="text-align:center; grid-column:1/-1; color:#dc2626; font-weight:bold;">⚠️ Error loading sheet data. Check Web App URL permissions.</div>`;
+            });
+        }
+
+        window.onload = loadSummaryCoreData;
+    </script>
+</body>
+</html>
+
